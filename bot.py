@@ -983,11 +983,18 @@ async def web_server():
     logging.info(f"🌐 Веб-сервер запущен на порту {port}")
 
 async def main():
-    print("🚀 Квест и веб-сервер запущены!")
-    await asyncio.gather(
-        web_server(),
-        dp.start_polling(bot)
-    )
+    print(" Квест и веб-сервер запущены!")
+    
+    # Запускаем веб-сервер для UptimeRobot в фоновом режиме один раз
+    asyncio.create_task(web_server())
+    
+    # Бесконечный цикл опроса Telegram с автоматическим переподключением при обрыве
+    while True:
+        try:
+            await dp.start_polling(bot)
+        except Exception as e:
+            print(f"Обрыв связи с Telegram: {e}. Переподключение через 5 секунд...")
+            await asyncio.sleep(5)
 
 if __name__ == "__main__":
     asyncio.run(main())
